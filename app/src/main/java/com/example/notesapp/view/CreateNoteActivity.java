@@ -8,13 +8,17 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Patterns;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,6 +28,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -37,6 +42,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class CreateNoteActivity extends AppCompatActivity {
 	
@@ -48,6 +54,9 @@ public class CreateNoteActivity extends AppCompatActivity {
 	private String selectedImagePath;
 	private View viewSubtitleIndicator;
 	private ImageView imageNote;
+	private TextView textWebURL;
+	private LinearLayout layoutWebURL;
+	private AlertDialog dialogAddURL;
 	
 	@Override
 	protected void onCreate ( Bundle savedInstanceState ) {
@@ -62,6 +71,8 @@ public class CreateNoteActivity extends AppCompatActivity {
 		textDateTime = findViewById ( R.id.textTimeDate );
 		viewSubtitleIndicator = findViewById ( R.id.viewSubtitleIndicator );
 		imageNote = findViewById ( R.id.imageNote );
+		textWebURL = findViewById ( R.id.textWebUrl );
+		layoutWebURL = findViewById ( R.id.layoutWebURL );
 		
 		textDateTime.setText ( new SimpleDateFormat ( "EEEE,dd MMMM HH:mm a" , Locale.getDefault ( ) ).format ( new Date ( ) ) );
 		ImageView imageSave = findViewById ( R.id.imageSave );
@@ -91,6 +102,10 @@ public class CreateNoteActivity extends AppCompatActivity {
 		note.setDateTime ( textDateTime.getText ( ).toString ( ) );
 		note.setColor ( selectedNoteColor );
 		note.setImagePath ( selectedImagePath );
+		
+		if ( layoutWebURL.getVisibility () == View.VISIBLE ){
+			note.setWebLink ( textWebURL.getText ().toString () );
+		}
 		
 		@SuppressLint ( "StaticFieldLeak" )
 		class SaveNoteTask extends AsyncTask < Void, Void, Void > {
@@ -192,6 +207,11 @@ public class CreateNoteActivity extends AppCompatActivity {
 				selectImage ( );
 			}
 		} );
+		
+		layoutMiscellaneous.findViewById ( R.id.layoutAddUrl ).setOnClickListener ( v -> {
+			bottomSheetBehavior.setState ( BottomSheetBehavior.STATE_COLLAPSED );
+			showAddURLDialog ();
+		} );
 	}
 	
 	private void setSubtitleIndicator ( ) {
@@ -263,4 +283,37 @@ public class CreateNoteActivity extends AppCompatActivity {
 		return filePath;
 	}
 	
+	private void showAddURLDialog(){
+		if ( dialogAddURL == null ){
+			AlertDialog.Builder builder = new AlertDialog.Builder ( CreateNoteActivity.this );
+			View view = LayoutInflater.from ( this ).inflate ( R.layout.layout_add_url, ( ViewGroup )findViewById ( R.id.layoutAddUrlContainer ) );
+			builder.setView ( view );
+			
+			dialogAddURL = builder.create ();
+			if ( dialogAddURL.getWindow () != null ){
+				dialogAddURL.getWindow ().setBackgroundDrawable ( new ColorDrawable ( 0 ) );
+			}
+			
+			final EditText text = view.findViewById ( R.id.inputUrl );
+			text.requestFocus ();
+			
+			view.findViewById ( R.id.textAdd ).setOnClickListener ( v -> {
+				if ( text.getText ().toString ().trim ().isEmpty () ){
+					Toast.makeText ( this , "Enter URL" , Toast.LENGTH_SHORT ).show ( );
+				}
+				else if ( ! Patterns.WEB_URL.matcher ( text.getText ( ).toString ( ) ).matches ( ) ) {
+					Toast.makeText ( this , "ENTER VALID URL" , Toast.LENGTH_SHORT ).show ( );
+				} else {
+					textWebURL.setText ( text.getText ().toString () );
+					layoutWebURL.setVisibility ( View.VISIBLE );
+					dialogAddURL.dismiss ();
+				}
+			} );
+			
+			view.findViewById ( R.id.textCancel ).setOnClickListener ( v -> {
+				dialogAddURL.dismiss ();
+			} );
+		}
+		dialogAddURL.show ();
+	}
 }

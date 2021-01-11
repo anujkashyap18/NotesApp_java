@@ -1,5 +1,6 @@
 package com.example.notesapp.controller;
 
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notesapp.R;
 import com.example.notesapp.model.Note;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class NotesAdapter extends RecyclerView.Adapter < NotesAdapter.NoteVieHol
 	@NonNull
 	@Override
 	public NoteVieHolder onCreateViewHolder ( @NonNull ViewGroup parent , int viewType ) {
-		return new NoteVieHolder ( LayoutInflater.from ( parent.getContext () ).inflate ( R.layout.item_container_note,parent,false ) );
+		return new NoteVieHolder ( LayoutInflater.from ( parent.getContext ( ) ).inflate ( R.layout.item_container_note , parent , false ) );
 	}
 	
 	@Override
@@ -37,7 +39,7 @@ public class NotesAdapter extends RecyclerView.Adapter < NotesAdapter.NoteVieHol
 	
 	@Override
 	public int getItemCount ( ) {
-		return notes.size ();
+		return notes.size ( );
 	}
 	
 	@Override
@@ -49,13 +51,15 @@ public class NotesAdapter extends RecyclerView.Adapter < NotesAdapter.NoteVieHol
 		
 		TextView textTitle, textSubtitle, textDateAndTime;
 		LinearLayout layoutNote;
+		RoundedImageView imageNote;
 		
 		public NoteVieHolder ( @NonNull View itemView ) {
 			super ( itemView );
 			textTitle = itemView.findViewById ( R.id.textTitle );
 			textSubtitle = itemView.findViewById ( R.id.textSubtitle );
 			textDateAndTime = itemView.findViewById ( R.id.textDateAndTime );
-			layoutNote = itemView.findViewById (R.id.layoutNote );
+			layoutNote = itemView.findViewById ( R.id.layoutNote );
+			imageNote = itemView.findViewById ( R.id.imageNote );
 		}
 		
 		void setNote ( Note note ) {
@@ -68,11 +72,20 @@ public class NotesAdapter extends RecyclerView.Adapter < NotesAdapter.NoteVieHol
 			}
 			textDateAndTime.setText ( note.getDateTime ( ) );
 			
-			GradientDrawable gradientDrawable = (GradientDrawable) layoutNote.getBackground ();
-			if ( note.getColor () != null ){
-				gradientDrawable.setColor ( Color.parseColor ( note.getColor () ) );
-			} else {
+			GradientDrawable gradientDrawable = ( GradientDrawable ) layoutNote.getBackground ( );
+			if ( note.getColor ( ) != null ) {
+				gradientDrawable.setColor ( Color.parseColor ( note.getColor ( ) ) );
+			}
+			else {
 				gradientDrawable.setColor ( Color.parseColor ( "#333333" ) );
+			}
+			
+			if ( note.getImagePath ( ) != null ) {
+				imageNote.setImageBitmap ( BitmapFactory.decodeFile ( note.getImagePath ( ) ) );
+				imageNote.setVisibility ( View.VISIBLE );
+			}
+			else {
+				imageNote.setVisibility ( View.GONE );
 			}
 		}
 	}

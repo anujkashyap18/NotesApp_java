@@ -20,8 +20,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 	
-	private RecyclerView noteRecView;
 	private final List < Note > noteList = new ArrayList <> ( );
+	private RecyclerView noteRecView;
 	private NotesAdapter notesAdapter;
 	
 	@Override
@@ -36,14 +36,14 @@ public class MainActivity extends AppCompatActivity {
 		
 		notesAdapter = new NotesAdapter ( noteList );
 		noteRecView.setAdapter ( notesAdapter );
-		
+
 //		getNotes ( );
 	}
 	
 	@Override
 	protected void onStart ( ) {
 		super.onStart ( );
-		getNotes ();
+		getNotes ( );
 	}
 	
 	private void getNotes ( ) {
@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 			
 			@Override
 			protected void onPostExecute ( List < Note > notes ) {
+				noteList.clear ( );
 				super.onPostExecute ( notes );
 				Log.d ( "MY_NOTES" , notes.toString ( ) );
 				if ( noteList.size ( ) == 0 ) {

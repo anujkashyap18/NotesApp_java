@@ -10,16 +10,17 @@
     app:behavior_peekHeight="40dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
-    <TextView
+    <ImageView
         android:id="@+id/textMiscellaneous"
         style="@style/bodyText"
         android:layout_width="match_parent"
         android:layout_height="32dp"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:text="@string/miscellaneous"
-        android:textColor="@color/white"
-        android:textSize="14dp" />
+        android:src="@drawable/menu"
+        android:rotation="90"
+        app:tint="@color/white"
+        android:contentDescription="@string/app_name" />
 
     <LinearLayout
         android:layout_width="match_parent"

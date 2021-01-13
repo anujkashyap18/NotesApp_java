@@ -35,9 +35,7 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
 		super.onCreate ( savedInstanceState );
 		setContentView ( R.layout.activity_main );
 		
-		findViewById ( R.id.imageAddNoteMain ).setOnClickListener ( v -> {
-			startActivityForResult ( new Intent ( MainActivity.this , CreateNoteActivity.class ) , REQUEST_CODE_ADD_NOTE );
-		} );
+		findViewById ( R.id.imageAddNoteMain ).setOnClickListener ( v -> startActivityForResult ( new Intent ( MainActivity.this , CreateNoteActivity.class ) , REQUEST_CODE_ADD_NOTE ) );
 		noteRecView = findViewById ( R.id.notesRecView );
 		noteRecView.setLayoutManager ( new
 				StaggeredGridLayoutManager ( 2 , StaggeredGridLayoutManager.VERTICAL ) );
@@ -45,16 +43,16 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
 		notesAdapter = new NotesAdapter ( noteList , this );
 		noteRecView.setAdapter ( notesAdapter );
 		
-		getNotes ( REQUEST_CODE_SHOW_NOTE );
+		getNotes ( REQUEST_CODE_SHOW_NOTE , false );
 	}
 	
 	@Override
 	protected void onStart ( ) {
 		super.onStart ( );
-		getNotes ( REQUEST_CODE_SHOW_NOTE );
+		getNotes ( REQUEST_CODE_SHOW_NOTE , false );
 	}
 	
-	private void getNotes ( final int requestCode ) {
+	private void getNotes ( final int requestCode , final boolean isNoteDeleted ) {
 		
 		@SuppressLint ( "StaticFieldLeak" )
 		class getTaskNote extends AsyncTask < Void, Void, List < Note > > {
@@ -79,8 +77,13 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
 				}
 				else if ( requestCode == REQUEST_CODE_UPDATE_NOTE ) {
 					noteList.remove ( noteClickedPosition );
-					noteList.add ( noteClickedPosition , notes.get ( noteClickedPosition ) );
-					notesAdapter.notifyItemChanged ( noteClickedPosition );
+					if ( isNoteDeleted ) {
+						notesAdapter.notifyItemChanged ( noteClickedPosition );
+					}
+					else {
+						noteList.add ( noteClickedPosition , notes.get ( noteClickedPosition ) );
+						notesAdapter.notifyItemChanged ( noteClickedPosition );
+					}
 				}
 			}
 		}
@@ -92,11 +95,11 @@ public class MainActivity extends AppCompatActivity implements NotesListener {
 	protected void onActivityResult ( int requestCode , int resultCode , @Nullable Intent data ) {
 		super.onActivityResult ( requestCode , resultCode , data );
 		if ( requestCode == REQUEST_CODE_ADD_NOTE && resultCode == RESULT_OK ) {
-			getNotes ( REQUEST_CODE_ADD_NOTE );
+			getNotes ( REQUEST_CODE_ADD_NOTE , false );
 		}
 		else if ( requestCode == REQUEST_CODE_UPDATE_NOTE && resultCode == RESULT_OK ) {
 			if ( data != null ) {
-				getNotes ( REQUEST_CODE_UPDATE_NOTE );
+				getNotes ( REQUEST_CODE_UPDATE_NOTE , data.getBooleanExtra ( "isNoteDeleted" , false ) );
 			}
 		}
 	}

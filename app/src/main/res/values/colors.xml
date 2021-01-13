@@ -13,4 +13,5 @@
     <color name="black">#121212</color>
     <color name="white">#FFFFFFFF</color>
     <color name="hint">#767676</color>
+    <color name="colorDelete">#F45555</color>
 </resources>

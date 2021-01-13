@@ -155,8 +155,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:autoLink="web"
+                    android:hint="@string/add_url"
+                    android:textColorHint="@color/hint"
                     android:includeFontPadding="false"
-                    android:text="www.google.com"
                     android:textColor="@color/primaryLightColor"
                     android:textSize="14dp"
                     tools:ignore="SpUsage" />

@@ -42,7 +42,6 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 public class CreateNoteActivity extends AppCompatActivity {
 	
@@ -57,6 +56,7 @@ public class CreateNoteActivity extends AppCompatActivity {
 	private TextView textWebURL;
 	private LinearLayout layoutWebURL;
 	private AlertDialog dialogAddURL;
+	private Note alreadyAvailableNote;
 	
 	@Override
 	protected void onCreate ( Bundle savedInstanceState ) {
@@ -81,8 +81,31 @@ public class CreateNoteActivity extends AppCompatActivity {
 		selectedNoteColor = "#333333";
 		selectedImagePath = "";
 		
+		if ( getIntent ( ).getBooleanExtra ( "isViewOrUpdate" , false ) ) {
+			alreadyAvailableNote = ( Note ) getIntent ( ).getSerializableExtra ( "note" );
+			setViewUpdateNote ( );
+		}
+		
 		initMiscellaneous ( );
 		setSubtitleIndicator ( );
+	}
+	
+	private void setViewUpdateNote ( ) {
+		inputNoteTitle.setText ( alreadyAvailableNote.getTitle ( ) );
+		inputNoteSubtitle.setText ( alreadyAvailableNote.getSubtitle ( ) );
+		inputNoteText.setText ( alreadyAvailableNote.getNoteText ( ) );
+		textDateTime.setText ( alreadyAvailableNote.getDateTime ( ) );
+		
+		if ( alreadyAvailableNote.getImagePath ( ) != null && ! alreadyAvailableNote.getImagePath ( ).trim ( ).isEmpty ( ) ) {
+			imageNote.setImageBitmap ( BitmapFactory.decodeFile ( alreadyAvailableNote.getImagePath ( ) ) );
+			imageNote.setVisibility ( View.VISIBLE );
+			selectedImagePath = alreadyAvailableNote.getImagePath ( );
+		}
+		
+		if ( alreadyAvailableNote.getWebLink ( ) != null && ! alreadyAvailableNote.getWebLink ( ).trim ( ).isEmpty ( ) ) {
+			textWebURL.setText ( alreadyAvailableNote.getWebLink ( ) );
+			layoutWebURL.setVisibility ( View.VISIBLE );
+		}
 	}
 	
 	private void saveNote ( ) {
@@ -103,8 +126,12 @@ public class CreateNoteActivity extends AppCompatActivity {
 		note.setColor ( selectedNoteColor );
 		note.setImagePath ( selectedImagePath );
 		
-		if ( layoutWebURL.getVisibility () == View.VISIBLE ){
-			note.setWebLink ( textWebURL.getText ().toString () );
+		if ( layoutWebURL.getVisibility ( ) == View.VISIBLE ) {
+			note.setWebLink ( textWebURL.getText ( ).toString ( ) );
+		}
+		
+		if ( alreadyAvailableNote != null ) {
+			note.setId ( alreadyAvailableNote.getId ( ) );
 		}
 		
 		@SuppressLint ( "StaticFieldLeak" )
@@ -195,6 +222,23 @@ public class CreateNoteActivity extends AppCompatActivity {
 			setSubtitleIndicator ( );
 		} );
 		
+		if ( alreadyAvailableNote != null && alreadyAvailableNote.getColor ( ) != null && alreadyAvailableNote.getColor ( ).trim ( ).isEmpty ( ) ) {
+			switch ( alreadyAvailableNote.getColor ( ) ) {
+				case "#ff9800":
+					layoutMiscellaneous.findViewById ( R.id.viewColor2 ).performClick ( );
+					break;
+				case "#ED4848":
+					layoutMiscellaneous.findViewById ( R.id.viewColor3 ).performClick ( );
+					break;
+				case "#FFBB86FC":
+					layoutMiscellaneous.findViewById ( R.id.viewColor4 ).performClick ( );
+					break;
+				case "#121212":
+					layoutMiscellaneous.findViewById ( R.id.viewColor5 ).performClick ( );
+					break;
+			}
+		}
+		
 		layoutMiscellaneous.findViewById ( R.id.layoutAddImage ).setOnClickListener ( v -> {
 			
 			bottomSheetBehavior.setState ( BottomSheetBehavior.STATE_COLLAPSED );
@@ -210,7 +254,7 @@ public class CreateNoteActivity extends AppCompatActivity {
 		
 		layoutMiscellaneous.findViewById ( R.id.layoutAddUrl ).setOnClickListener ( v -> {
 			bottomSheetBehavior.setState ( BottomSheetBehavior.STATE_COLLAPSED );
-			showAddURLDialog ();
+			showAddURLDialog ( );
 		} );
 	}
 	
@@ -283,37 +327,38 @@ public class CreateNoteActivity extends AppCompatActivity {
 		return filePath;
 	}
 	
-	private void showAddURLDialog(){
-		if ( dialogAddURL == null ){
+	private void showAddURLDialog ( ) {
+		if ( dialogAddURL == null ) {
 			AlertDialog.Builder builder = new AlertDialog.Builder ( CreateNoteActivity.this );
-			View view = LayoutInflater.from ( this ).inflate ( R.layout.layout_add_url, ( ViewGroup )findViewById ( R.id.layoutAddUrlContainer ) );
+			View view = LayoutInflater.from ( this ).inflate ( R.layout.layout_add_url , ( ViewGroup ) findViewById ( R.id.layoutAddUrlContainer ) );
 			builder.setView ( view );
 			
-			dialogAddURL = builder.create ();
-			if ( dialogAddURL.getWindow () != null ){
-				dialogAddURL.getWindow ().setBackgroundDrawable ( new ColorDrawable ( 0 ) );
+			dialogAddURL = builder.create ( );
+			if ( dialogAddURL.getWindow ( ) != null ) {
+				dialogAddURL.getWindow ( ).setBackgroundDrawable ( new ColorDrawable ( 0 ) );
 			}
 			
 			final EditText text = view.findViewById ( R.id.inputUrl );
-			text.requestFocus ();
+			text.requestFocus ( );
 			
 			view.findViewById ( R.id.textAdd ).setOnClickListener ( v -> {
-				if ( text.getText ().toString ().trim ().isEmpty () ){
+				if ( text.getText ( ).toString ( ).trim ( ).isEmpty ( ) ) {
 					Toast.makeText ( this , "Enter URL" , Toast.LENGTH_SHORT ).show ( );
 				}
 				else if ( ! Patterns.WEB_URL.matcher ( text.getText ( ).toString ( ) ).matches ( ) ) {
 					Toast.makeText ( this , "ENTER VALID URL" , Toast.LENGTH_SHORT ).show ( );
-				} else {
-					textWebURL.setText ( text.getText ().toString () );
+				}
+				else {
+					textWebURL.setText ( text.getText ( ).toString ( ) );
 					layoutWebURL.setVisibility ( View.VISIBLE );
-					dialogAddURL.dismiss ();
+					dialogAddURL.dismiss ( );
 				}
 			} );
 			
 			view.findViewById ( R.id.textCancel ).setOnClickListener ( v -> {
-				dialogAddURL.dismiss ();
+				dialogAddURL.dismiss ( );
 			} );
 		}
-		dialogAddURL.show ();
+		dialogAddURL.show ( );
 	}
 }
